@@ -48,3 +48,56 @@ FROM customer_shopping_data
 GROUP BY category
 ORDER BY total_sales DESC
 LIMIT 10;
+-- 9. JOIN: Customer Sales Summary
+SELECT
+    c.customer_id,
+    c.gender,
+    c.category,
+    c.total_sales,
+    s.customer_total_sales
+FROM customer_shopping_data AS c
+JOIN (
+    SELECT
+        customer_id,
+        SUM(total_sales) AS customer_total_sales
+    FROM customer_shopping_data
+    GROUP BY customer_id
+) AS s
+ON c.customer_id = s.customer_id
+LIMIT 10;
+
+-- 10. CTE: Categories with Sales Above $10 Million
+WITH category_sales AS (
+    SELECT
+        category,
+        SUM(total_sales) AS total_sales
+    FROM customer_shopping_data
+    GROUP BY category
+)
+SELECT
+    category,
+    total_sales
+FROM category_sales
+WHERE total_sales > 10000000
+ORDER BY total_sales DESC;
+
+-- 11. Subquery: Sales Above Average
+SELECT
+    customer_id,
+    total_sales
+FROM customer_shopping_data
+WHERE total_sales > (
+    SELECT AVG(total_sales)
+    FROM customer_shopping_data
+)
+ORDER BY total_sales DESC
+LIMIT 10;
+
+-- 12. Window Function: Rank Sales
+SELECT
+    customer_id,
+    total_sales,
+    RANK() OVER (ORDER BY total_sales DESC) AS sales_rank
+FROM customer_shopping_data
+ORDER BY sales_rank
+LIMIT 10;
